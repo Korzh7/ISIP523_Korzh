@@ -22,7 +22,8 @@ for (int i = 0; i < quantity; i++)
 
 }
 
-void output(string[] productOrService, int[] cost,  int quantity)
+
+void outputValues(string[] productOrService, int[] cost,  int quantity)
 {
     for (int i = 0; i < quantity; i++)
     {
@@ -47,6 +48,64 @@ void output(string[] productOrService, int[] cost,  int quantity)
 
 }
 
+void bubbleSorteCost(string[] productOrService, int[] cost, int quantity)
+{
+
+    for (int i = 0; i < quantity; i++)
+    {
+        for (int j = 0; j < quantity - 1; j++)
+        {
+            if (cost[i] < cost[j])
+            {
+                int temp = cost[i];
+                cost[i] = cost[j];
+                cost[j] = temp;
+                string temp2 = productOrService[i];
+                productOrService[i] = productOrService[j];
+                productOrService[j] = temp2;
+            }
+        }
+    }
+    
+}
+
+void currencyConverter(int[] cost, int quantity)
+{
+    Console.WriteLine("Выберите в какую валюту хотите перевести: ");
+    Console.WriteLine("1. Доллар");
+    Console.WriteLine("2. Евро");
+    Console.WriteLine("3. Фунты");
+    
+    int n = Convert.ToInt32(Console.ReadLine());
+    decimal usdRate = 83.0m;
+    decimal eurRate = 97.0m;
+    decimal tugrRate = 0.02m;
+
+    if (n == 1)
+    {
+        for(int i = 0; i < quantity; i++)
+        {
+            
+            cost[i] = (int)(cost[i] * usdRate);
+        }
+    }
+    else if (n == 2)
+    {
+        for (int i = 0; i < quantity; i++)
+        {
+            cost[i] = (int)(cost[i] * eurRate);
+        }
+    }
+    else if (n == 1)
+    {
+        for (int i = 0; i < quantity; i++)
+        {
+            cost[i] = (int)(cost[i] * tugrRate);
+        }
+    }
+}
+
+
 Console.WriteLine("Меню:");
 Console.WriteLine("1. Вывод данных");
 Console.WriteLine("2. Статистика");
@@ -61,6 +120,6 @@ for (int i = 0; i < 100000; i++)
     int n = Convert.ToInt32(Console.ReadLine());
     if (n == 1)
     {
-        output(productOrService, cost, quantity);
+        outputValues(productOrService, cost, quantity);
     }
 }
