@@ -21,3 +21,46 @@ for (int i = 0; i < quantity; i++)
     
 
 }
+
+void output(string[] productOrService, int[] cost,  int quantity)
+{
+    for (int i = 0; i < quantity; i++)
+    {
+        Console.WriteLine($"{productOrService[i]} - {cost[i]} руб.");
+    }
+}
+
+(int average, int max, int min, int sum) stats(string[] productOrService, int[] cost, int quantity)
+{
+    int average = 0, max = 0, min = 0, sum = 0;
+    for (int i = 0; i < quantity; i++)
+    {
+        average += cost[i];
+        if (min > cost[i]) min = cost[i];
+        if (max <  cost[i]) max = cost[i];
+        sum+= cost[i];
+
+
+    }
+    average /= quantity;
+    return (average, min, max, sum);
+
+}
+
+Console.WriteLine("Меню:");
+Console.WriteLine("1. Вывод данных");
+Console.WriteLine("2. Статистика");
+Console.WriteLine("3. Сортировка по цене");
+Console.WriteLine("4. Конвертация валюты");
+Console.WriteLine("5. Поиск по названию ");
+Console.WriteLine("0. Выход");
+
+for (int i = 0; i < 100000; i++)
+{
+    
+    int n = Convert.ToInt32(Console.ReadLine());
+    if (n == 1)
+    {
+        output(productOrService, cost, quantity);
+    }
+}
