@@ -14,11 +14,11 @@ string[] productOrService = new string[quantity];
 int[] cost = new int[quantity];
 for (int i = 0; i < quantity; i++)
 {
-    Console.WriteLine("Введите услугу или товар: ");
-    productOrService[i] = Console.ReadLine();
-    Console.WriteLine("Введите стоимость: ");
-    cost[i] = Convert.ToInt32(Console.ReadLine());
-    
+    Console.WriteLine("Введите услугу или товар и стоимость (через ;): ");
+    string str = Console.ReadLine();
+    string[] words = str.Split(new char[] { ';' });
+    productOrService[i] = words[0];
+    cost[i] = Convert.ToInt32(words[1]);
 
 }
 
@@ -31,7 +31,7 @@ void outputValues(string[] productOrService, int[] cost,  int quantity)
     }
 }
 
-(int average, int max, int min, int sum) stats(string[] productOrService, int[] cost, int quantity)
+void stats(string[] productOrService, int[] cost, int quantity)
 {
     int average = 0, max = 0, min = 9999, sum = 0;
     for (int i = 0; i < quantity; i++)
@@ -44,7 +44,7 @@ void outputValues(string[] productOrService, int[] cost,  int quantity)
 
     }
     average /= quantity;
-    return (average, max, min, sum);
+    Console.WriteLine($"{average} "average.ToString(), sum.ToString(), min.ToString(), max.ToString());
 
 }
 
@@ -74,34 +74,57 @@ void currencyConverter(int[] cost, int quantity)
     Console.WriteLine("Выберите в какую валюту хотите перевести: ");
     Console.WriteLine("1. Доллар");
     Console.WriteLine("2. Евро");
-    Console.WriteLine("3. Тугрики");
-    
+    Console.WriteLine("3. Тугрик");
+    Console.WriteLine("4. Своя валюта");
+
+    decimal[] costcopy = new decimal[quantity];
+    for(int i = 0; i < quantity; i++)
+    {
+        costcopy[i] = cost[i];
+    }
+
     int n = Convert.ToInt32(Console.ReadLine());
+    string choice = "";
     decimal usdRate = 83.0m;
     decimal eurRate = 97.0m;
     decimal tugrRate = 0.02m;
+    decimal perRate = 0;
 
     if (n == 1)
     {
+        choice = "Доллар";
         for(int i = 0; i < quantity; i++)
         {
             
-            cost[i] = (int)(cost[i] * usdRate);
+            costcopy[i] = (decimal)(costcopy[i] / usdRate);
         }
     }
     if (n == 2)
     {
         for (int i = 0; i < quantity; i++)
         {
-            cost[i] = (int)(cost[i] * eurRate);
+            costcopy[i] = (decimal)(costcopy[i] / eurRate);
         }
     }
     if (n == 3)
     {
         for (int i = 0; i < quantity; i++)
         {
-            cost[i] = (int)(cost[i] * tugrRate);
+            costcopy[i] = (decimal)(costcopy[i] / tugrRate);
         }
+    }
+    if(n == 4)
+    {
+        Console.WriteLine("Введите курс: ");
+        perRate = Convert.ToDecimal(Console.ReadLine());
+        for (int i = 0; i < quantity; i++)
+        {
+            costcopy[i] = (decimal)(costcopy[i] / perRate);
+        }
+    }
+    for (int i = 0; i < quantity; i++)
+    {
+        Console.WriteLine($"{productOrService[i]} - {costcopy[i]} {choice} (а/ов)");
     }
 }
 
@@ -136,14 +159,14 @@ for (int i = 0; i < 100000; i++)
         outputValues(productOrService, cost, quantity);
     }
     if (n == 2) {
-        var result = stats(productOrService, cost, quantity);
-        Console.WriteLine($"Среднее: {result.average}, Мин: {result.min}, Макс: {result.max}, Сумма: {result.sum}");
+        stats(productOrService, cost, quantity);
     }
     if (n == 3) {
         bubbleSorteCost(productOrService, cost, quantity);
     }
     if (n == 4) { 
         currencyConverter(cost, quantity);
+
     }
     if (n == 5) {
         searchByName(productOrService, cost, quantity);
