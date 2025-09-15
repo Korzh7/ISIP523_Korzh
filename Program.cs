@@ -33,7 +33,7 @@ void outputValues(string[] productOrService, int[] cost,  int quantity)
 
 (int average, int max, int min, int sum) stats(string[] productOrService, int[] cost, int quantity)
 {
-    int average = 0, max = 0, min = 0, sum = 0;
+    int average = 0, max = 0, min = 9999, sum = 0;
     for (int i = 0; i < quantity; i++)
     {
         average += cost[i];
@@ -44,7 +44,7 @@ void outputValues(string[] productOrService, int[] cost,  int quantity)
 
     }
     average /= quantity;
-    return (average, min, max, sum);
+    return (average, max, min, sum);
 
 }
 
@@ -74,7 +74,7 @@ void currencyConverter(int[] cost, int quantity)
     Console.WriteLine("Выберите в какую валюту хотите перевести: ");
     Console.WriteLine("1. Доллар");
     Console.WriteLine("2. Евро");
-    Console.WriteLine("3. Фунты");
+    Console.WriteLine("3. Тугрики");
     
     int n = Convert.ToInt32(Console.ReadLine());
     decimal usdRate = 83.0m;
@@ -89,18 +89,31 @@ void currencyConverter(int[] cost, int quantity)
             cost[i] = (int)(cost[i] * usdRate);
         }
     }
-    else if (n == 2)
+    if (n == 2)
     {
         for (int i = 0; i < quantity; i++)
         {
             cost[i] = (int)(cost[i] * eurRate);
         }
     }
-    else if (n == 1)
+    if (n == 3)
     {
         for (int i = 0; i < quantity; i++)
         {
             cost[i] = (int)(cost[i] * tugrRate);
+        }
+    }
+}
+
+void searchByName(string[] producrOrService, int[] cost, int quantity)
+{
+    Console.WriteLine("Введите товар или услугу стоимость которой хотите увидеть: ");
+    string pos = Console.ReadLine();
+    for (int i = 0; i < quantity; i++)
+    {
+        if (pos == producrOrService[i])
+        {
+            Console.WriteLine(cost[i]);
         }
     }
 }
@@ -121,5 +134,21 @@ for (int i = 0; i < 100000; i++)
     if (n == 1)
     {
         outputValues(productOrService, cost, quantity);
+    }
+    if (n == 2) {
+        var result = stats(productOrService, cost, quantity);
+        Console.WriteLine($"Среднее: {result.average}, Мин: {result.min}, Макс: {result.max}, Сумма: {result.sum}");
+    }
+    if (n == 3) {
+        bubbleSorteCost(productOrService, cost, quantity);
+    }
+    if (n == 4) { 
+        currencyConverter(cost, quantity);
+    }
+    if (n == 5) {
+        searchByName(productOrService, cost, quantity);
+    }
+    if (n == 0) {
+        break;    
     }
 }
