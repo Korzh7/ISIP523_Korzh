@@ -196,8 +196,166 @@ class Program
             Console.WriteLine("Товар с таким именем не найден!");
         }
     }
+    static void SearchByAnything(List<Product> products)
+    {
+        if (products.Count == 0)
+        {
+            Console.WriteLine("Список товаров пуст!");
+            return;
+        }
 
-    
+        Console.WriteLine("По какому параметру будете искать товар");
+        Console.WriteLine("1. ID");
+        Console.WriteLine("2. Название");
+        Console.WriteLine("3. Категория");
+
+        int which = Convert.ToInt32(Console.ReadLine());
+
+        if (which == 1)
+        {
+            Console.WriteLine("Введите ID товара: ");
+            int idToSearch = Convert.ToInt32(Console.ReadLine());
+
+            Product foundProduct = null;
+            foreach (var product in products)
+            {
+                if (product.Id == idToSearch)
+                {
+                    foundProduct = product;
+                    break;
+                }
+            }
+
+            if (foundProduct != null)
+            {
+                Console.WriteLine($"{foundProduct.Id} - {foundProduct.Name} - {foundProduct.Category}");
+            }
+            else
+            {
+                Console.WriteLine("Товар с таким ID не найден!");
+            }
+        }
+        else if (which == 2)
+        {
+            Console.WriteLine("Введите название товара: ");
+            string nameToSearch = Console.ReadLine();
+
+            Product foundProduct = null;
+            foreach (var product in products)
+            {
+                if (product.Name.Equals(nameToSearch, StringComparison.OrdinalIgnoreCase))
+                {
+                    foundProduct = product;
+                    break;
+                }
+            }
+
+            if (foundProduct != null)
+            {
+                Console.WriteLine($"{foundProduct.Id} - {foundProduct.Name} - {foundProduct.Category}");
+            }
+            else
+            {
+                Console.WriteLine("Товар с таким названием не найден!");
+            }
+        }
+        else if (which == 3)
+        {
+            Console.WriteLine("Выберите категорию товара: ");
+            Console.WriteLine("1. Электроника");
+            Console.WriteLine("2. Одежда");
+            Console.WriteLine("3. Еда");
+            Console.WriteLine("4. Книги");
+            Console.WriteLine("5. Спортивное");
+
+            int categoryChoice = Convert.ToInt32(Console.ReadLine());
+
+            if (categoryChoice >= 1 && categoryChoice <= 5)
+            {
+                ProductCategory selectedCategory = (ProductCategory)categoryChoice;
+
+                List<Product> productsInCategory = new List<Product>();
+                foreach (var product in products)
+                {
+                    if (product.Category == selectedCategory)
+                    {
+                        productsInCategory.Add(product);
+                    }
+                }
+
+                if (productsInCategory.Count > 0)
+                {
+                    Console.WriteLine($"\nТовары в категории '{selectedCategory}':");
+                    foreach (var product in productsInCategory)
+                    {
+                        Console.WriteLine($"{product.Id} - {product.Name} - Цена: {product.Price} - Количество: {product.Quantity}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Товары в категории '{selectedCategory}' не найдены!");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Неверный выбор категории!");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Неверный выбор параметра поиска!");
+        }
+    }
+
+    static void Main(string[] args)
+    {
+        List<Product> products = new List<Product>();
+
+        while (true)
+        {
+
+            Console.WriteLine("1. Добавить товар");
+            Console.WriteLine("2. Удалить товар");
+            Console.WriteLine("3. Показать все товары");
+            Console.WriteLine("4. Заказать товар (увеличить количество)");
+            Console.WriteLine("5. Продать товары");
+            Console.WriteLine("6. Поиск товаров");
+            Console.WriteLine("7. Выход");
+            Console.Write("Выберите действие: ");
+
+            string choice = Console.ReadLine();
+
+            switch (choice)
+            {
+                case "1":
+                    Add(products);
+                    break;
+                case "2":
+                    Remove(products);
+                    break;
+                case "3":
+                    ShowAllProducts(products);
+                    break;
+                case "4":
+                    Order(products);
+                    break;
+                case "5":
+                    Sell(products);
+                    break;
+                case "6":
+                    SearchByAnything(products);
+                    break;
+                case "7":
+                    Console.WriteLine("Выход из программы...");
+                    return;
+                default:
+                    Console.WriteLine("Неверный выбор!");
+                    break;
+            }
+        }
+    }
+}
+
 
 
 public enum ProductCategory
