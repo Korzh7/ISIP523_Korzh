@@ -91,8 +91,115 @@ class Program
             Console.WriteLine("Товар с таким ID не найден!");
         }
     }
+    static void ShowAllProducts(List<Product> products)
+    {
+        if (products.Count == 0)
+        {
+            Console.WriteLine("Товаров нет!");
+            return;
+        }
 
- 
+        Console.WriteLine("\n Все товары");
+        foreach (var product in products)
+        {
+            Console.WriteLine($"ID: {product.Id}, Название: {product.Name}, " +
+                            $"Цена: {product.Price}, Количество: {product.Quantity}, " +
+                            $"В наличии: {product.IsAvailable}, Категория: {product.Category}");
+        }
+    }
+
+    static void Order(List<Product> products)
+    {
+        if (products.Count == 0)
+        {
+            Console.WriteLine("Список товаров пуст!");
+            return;
+        }
+
+        Console.WriteLine("Список товаров:");
+        foreach (var product in products)
+        {
+            Console.WriteLine($"ID: {product.Id}, Название: {product.Name}");
+        }
+
+        Console.WriteLine("Введите название товара поставку которого хотите увеличить: ");
+        string nameForOrder = Console.ReadLine();
+
+        Product productToOrder = null;
+        foreach (var product in products)
+        {
+            if (product.Name == nameForOrder)
+            {
+                productToOrder = product;
+                break;
+            }
+        }
+
+        if (productToOrder != null)
+        {
+            Console.WriteLine("Введите сколько хотите заказать товара: ");
+            int quantityToOrder = Convert.ToInt32(Console.ReadLine());
+            productToOrder.Quantity += quantityToOrder;
+            Console.WriteLine($"Количество товара '{productToOrder.Name}' увеличено на {quantityToOrder}");
+        }
+        else
+        {
+            Console.WriteLine("Товар с таким именем не найден!");
+        }
+    }
+
+    static void Sell(List<Product> products)
+    {
+        if (products.Count == 0)
+        {
+            Console.WriteLine("Список товаров пуст!");
+            return;
+        }
+
+        Console.WriteLine("Список товаров:");
+        foreach (var product in products)
+        {
+            Console.WriteLine($"ID: {product.Id}, Название: {product.Name}, Количество: {product.Quantity}");
+        }
+
+        Console.WriteLine("Введите название товара который хотите продать: ");
+        string nameForSell = Console.ReadLine();
+
+        Product productToSell = null;
+        foreach (var product in products)
+        {
+            if (product.Name.Equals(nameForSell, StringComparison.OrdinalIgnoreCase))
+            {
+                productToSell = product;
+                break;
+            }
+        }
+
+        if (productToSell != null)
+        {
+            Console.WriteLine("Введите сколько хотите продать товара: ");
+            int quantityToSell = Convert.ToInt32(Console.ReadLine());
+
+            if (productToSell.Quantity <= quantityToSell)
+            {
+                products.Remove(productToSell);
+                Console.WriteLine($"Товар '{productToSell.Name}' удален!");
+            }
+            else
+            {
+                productToSell.Quantity -= quantityToSell;
+                Console.WriteLine($"Продано {quantityToSell} единиц товара '{productToSell.Name}'");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Товар с таким именем не найден!");
+        }
+    }
+
+    
+
+
 public enum ProductCategory
 {
     Электроника = 1,
@@ -110,4 +217,4 @@ class Product
     public int Quantity;
     public bool IsAvailable;
     public ProductCategory Category;
-}
+};
