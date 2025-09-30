@@ -177,4 +177,34 @@ class Program
         }
 
         
-        
+        void SaveToHistory()
+        {
+            
+            Characteristic historyCopy = new Characteristic();
+            historyCopy.text = this.text.Length > 30 ? this.text.Substring(0, 30) + "..." : this.text;
+            historyCopy.wordsCount = this.wordsCount;
+            historyCopy.shortestWord = this.shortestWord;
+            historyCopy.sentencesCount = this.sentencesCount;
+            historyCopy.consonant = this.consonant;
+            historyCopy.vowel = this.vowel;
+            historyCopy.longestWord = this.longestWord;
+            historyCopy.azbyka = new Dictionary<char, int>(this.azbyka);
+
+            textHistory.Add(historyCopy);
+        }
+
+        public void CalculateAllStats()
+        {
+            if (string.IsNullOrEmpty(text))
+                return;
+
+            WordCount();
+            ShortestWordSearch();
+            LongestWordSearch();
+            SentencesCount();
+            LettersQuantity();
+            StatsLetters();
+            SaveToHistory();
+        }
+
+        }
