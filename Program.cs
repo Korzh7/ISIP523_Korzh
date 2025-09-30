@@ -1,11 +1,52 @@
-﻿//Необходимо написать программу, которая будет принимать текст от пользователя и делать над ним определённые действия.
-//Функциональные требования:
-//Программа принимает от пользователя минимум 100 символов
-//Подсчёт количества слов в тексте
-//Поиск самого короткого слова
-//Пдсчёт количества предложений
-//Подсчёт количества гласных и согласных букв
-//Поиск самого длинного слова
-//Создание статистики по частоте встречаемости каждой буквы
-//Возможность продолжить работу с новым текстом
+﻿using System;
+using System.Collections.Generic;
 
+class Program
+{
+    class Characteristic
+    {
+        public string text;
+        public int wordsCount = 0;
+        public string shortestWord = "";
+        public int sentencesCount = 0;
+        public int consonant = 0;
+        public int vowel = 0;
+        public string longestWord = "";
+        Dictionary<char, int> azbyka = new Dictionary<char, int>();
+
+        
+        static List<Characteristic> textHistory = new List<Characteristic>();
+
+        public void TextAdd()
+        {
+            Console.WriteLine("Введите текст (не менее 100 символов)");
+            Console.WriteLine("Вводите текст построчно. Для завершения ввода введите пустую строку:");
+
+            string input = "";
+            string line;
+            int totalLength = 0;
+
+           
+            while (!string.IsNullOrWhiteSpace(line = Console.ReadLine()))
+            {
+                input += line + "\n";
+                totalLength += line.Length;
+
+               
+               
+            }
+
+            text = input.Trim();
+
+            if (text.Length < 100)
+            {
+                Console.WriteLine("Вы ввели некорректный текст (менее 100 символов)");
+                text = null;
+            }
+            else
+            {
+                Console.WriteLine($"Текст успешно принят! Длина: {text.Length} символов");
+            }
+        }
+
+        
