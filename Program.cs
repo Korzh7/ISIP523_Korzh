@@ -78,3 +78,38 @@ class Program
                 }
             }
         }
+
+        void LongestWordSearch()
+        {
+            char[] separators = { ' ', ',', '.', '!', '?', ';', ':', '\t', '\n', '\r', '(', ')', '[', ']', '{', '}', '"', '\'' };
+            string[] words = text.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+
+            if (words.Length == 0)
+            {
+                longestWord = "";
+                return;
+            }
+
+            longestWord = words[0];
+            for (int i = 1; i < words.Length; i++)
+            {
+                if (words[i].Length > longestWord.Length)
+                {
+                    longestWord = words[i];
+                }
+            }
+        }
+
+        void SentencesCount()
+        {
+            sentencesCount = 0;
+            foreach (char ch in text)
+            {
+                if (ch == '.' || ch == '!' || ch == '?')
+                {
+                    sentencesCount++;
+                }
+            }
+        }
+
+       
