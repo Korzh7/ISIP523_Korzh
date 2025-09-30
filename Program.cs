@@ -50,3 +50,31 @@ class Program
         }
 
         
+
+        void WordCount()
+        {
+            char[] separators = { ' ', ',', '.', '!', '?', ';', ':', '\t', '\n', '\r', '(', ')', '[', ']', '{', '}', '"', '\'' };
+            string[] words = text.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+            wordsCount = words.Length;
+        }
+
+        void ShortestWordSearch()
+        {
+            char[] separators = { ' ', ',', '.', '!', '?', ';', ':', '\t', '\n', '\r', '(', ')', '[', ']', '{', '}', '"', '\'' };
+            string[] words = text.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+
+            if (words.Length == 0)
+            {
+                shortestWord = "";
+                return;
+            }
+
+            shortestWord = words[0];
+            for (int i = 1; i < words.Length; i++)
+            {
+                if (words[i].Length < shortestWord.Length)
+                {
+                    shortestWord = words[i];
+                }
+            }
+        }
