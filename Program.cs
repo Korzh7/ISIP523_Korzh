@@ -1,32 +1,41 @@
-﻿
-class MainProgramm
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+public enum Genre
 {
-    enum Genre{
-        Детектив;
-        Триллер;
-        Комедия;
-    }
-    class Book
+    Fantasy,
+    ScienceFiction,
+    Mystery,
+    Romance,
+    Thriller,
+    Biography,
+    History
+}
+
+public class Book
+{
+    public int Id { get; set; }
+    public string Title { get; set; }
+    public string Author { get; set; }
+    public Genre Genre { get; set; }
+    public int Year { get; set; }
+    public decimal Price { get; set; }
+
+    public override string ToString()
     {
-        public int id;
-        public string name;
-        public string author;
-        public Genre genre;
-        public int year;
-        public int price;
-        List <Book> Library = new List<Book>();
+        return $"ID: {Id}, Название: {Title}, Автор: {Author}, Жанр: {Genre}, Год: {Year}, Цена: {Price:C}";
+    }
+}
 
-        static void Add
-        {
-            Console.WriteLine("Ввдите название произведения, фамилию автора, жанр из предложенных, год написания, цену за книгу");
-            for (int i = 0; i<Genre.length; i++)
-			{
-                Console.WriteLine(Genre[i]);
-			}
-            
-            Library.add 
+class Program
+{
+    static List<Book> books = new List<Book>();
+    static int nextId = 1;
 
-        }
-
+    static void Main(string[] args)
+    {
+        Console.WriteLine("=== СИСТЕМА УЧЁТА БИБЛИОТЕКИ ===");
+        
     }
 }
