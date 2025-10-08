@@ -1,60 +1,109 @@
-﻿static void InitializeTestData()
+﻿static void AddBook()
 {
-    books.AddRange(new[]
+    Console.WriteLine("\n=== ДОБАВЛЕНИЕ НОВОЙ КНИГИ ===");
+
+    Console.Write("Название: ");
+    string title = Console.ReadLine();
+    if (string.IsNullOrWhiteSpace(title))
     {
-        new Book { Id = nextId++, Title = "Властелин Колец", Author = "Дж. Р. Р. Толкин", Genre = Genre.Fantasy, Year = 1954, Price = 1500 },
-        new Book { Id = nextId++, Title = "1984", Author = "Джордж Оруэлл", Genre = Genre.ScienceFiction, Year = 1949, Price = 800 },
-        new Book { Id = nextId++, Title = "Убийство в Восточном экспрессе", Author = "Агата Кристи", Genre = Genre.Mystery, Year = 1934, Price = 700 },
-        new Book { Id = nextId++, Title = "Гордость и предубеждение", Author = "Джейн Остин", Genre = Genre.Romance, Year = 1813, Price = 600 },
-        new Book { Id = nextId++, Title = "Шерлок Холмс", Author = "Артур Конан Дойл", Genre = Genre.Mystery, Year = 1887, Price = 900 }
-    });
-
-    Console.WriteLine("Добавлено 5 тестовых книг.");
-}
-
-static void ShowMenu()
-{
-    Console.WriteLine("\n=== ГЛАВНОЕ МЕНЮ ===");
-    Console.WriteLine("1. Добавить книгу");
-    Console.WriteLine("2. Удалить книгу по ID");
-    Console.WriteLine("3. Найти книги");
-    Console.WriteLine("4. Отсортировать книги");
-    Console.WriteLine("5. Самая дорогая и дешёвая книга");
-    Console.WriteLine("6. Книги по авторам");
-    Console.WriteLine("7. Показать все книги");
-    Console.WriteLine("8. Выход");
-    Console.Write("Выберите действие: ");
-}
-
-
-static void Main(string[] args)
-{
-    InitializeTestData();
-
-    Console.WriteLine("=== СИСТЕМА УЧЁТА БИБЛИОТЕКИ ===");
-
-    while (true)
-    {
-        ShowMenu();
-
-        int choice;
-        if (!int.TryParse(Console.ReadLine(), out choice))
-        {
-            Console.WriteLine("Ошибка ввода! Введите число от 1 до 8.");
-            continue;
-        }
-
-        switch (choice)
-        {
-            case 1:
-               
-                break;
-            case 8:
-                Console.WriteLine("До свидания!");
-                return;
-            default:
-                Console.WriteLine("Неверный выбор! Введите число от 1 до 8.");
-                break;
-        }
+        Console.WriteLine("Ошибка: название не может быть пустым!");
+        return;
     }
+
+    Console.Write("Автор: ");
+    string author = Console.ReadLine();
+    if (string.IsNullOrWhiteSpace(author))
+    {
+        Console.WriteLine("Ошибка: автор не может быть пустым!");
+        return;
+    }
+
+    Console.WriteLine("Выберите жанр:");
+    var genres = Enum.GetValues(typeof(Genre));
+    for (int i = 0; i < genres.Length; i++)
+    {
+        Console.WriteLine($"{i + 1}. {genres.GetValue(i)}");
+    }
+
+    Console.Write("Жанр (номер): ");
+    if (!int.TryParse(Console.ReadLine(), out int genreChoice) || genreChoice < 1 || genreChoice > genres.Length)
+    {
+        Console.WriteLine($"Ошибка: выберите жанр от 1 до {genres.Length}!");
+        return;
+    }
+
+    Console.Write("Год издания: ");
+    if (!int.TryParse(Console.ReadLine(), out int year) || year < 1000 || year > DateTime.Now.Year)
+    {
+        Console.WriteLine($"Ошибка: год должен быть от 1000 до {DateTime.Now.Year}!");
+        return;
+    }
+
+    Console.Write("Цена: ");
+    if (!decimal.TryParse(Console.ReadLine(), out decimal price) || price < 0)
+    {
+        Console.WriteLine("Ошибка: цена должна быть положительным числом!");
+        return;
+    }
+
+    var newBook = new Book
+    {
+        Id = nextId++,
+        Title = title.Trim(),
+        Author = author.Trim(),
+        Genre = (Genre)(genreChoice - 1),
+        Year = year,
+        Price = price
+    };
+
+    books.Add(newBook);
+    Console.WriteLine($"Книга '{title}' успешно добавлена с ID {newBook.Id}!");
+}
+
+static void RemoveBook()
+{
+    if (!books.Any())
+    {
+        Console.WriteLine("Библиотека пуста!");
+        return;
+    }
+
+    Console.WriteLine("\n=== УДАЛЕНИЕ КНИГИ ===");
+    ShowAllBooks();
+
+    Console.Write("Введите ID книги для удаления: ");
+    if (!int.TryParse(Console.ReadLine(), out int idToRemove))
+    {
+        Console.WriteLine("Ошибка: ID должен быть числом!");
+        return;
+    }
+
+    var bookToRemove = books.FirstOrDefault(b => b.Id == idToRemove);
+
+    if (bookToRemove != null)
+    {
+        books.Remove(bookToRemove);
+        Console.WriteLine($"Книга '{bookToRemove.Title}' успешно удалена!");
+    }
+    else
+    {
+        Console.WriteLine("Книга с таким ID не найдена!");
+    }
+}
+
+
+switch (choice)
+{
+    case 1:
+        AddBook();
+        break;
+    case 2:
+        RemoveBook();
+        break;
+    case 8:
+        Console.WriteLine("До свидания!");
+        return;
+    default:
+        Console.WriteLine("Неверный выбор! Введите число от 1 до 8.");
+        break;
 }
