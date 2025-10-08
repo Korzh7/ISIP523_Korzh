@@ -1,4 +1,4 @@
-﻿static void SearchBooks()
+﻿static void ShowPriceExtremes()
 {
     if (!books.Any())
     {
@@ -6,84 +6,29 @@
         return;
     }
 
-    Console.WriteLine("\n=== ПОИСК КНИГ ===");
-    Console.WriteLine("1. По названию");
-    Console.WriteLine("2. По автору");
-    Console.WriteLine("3. По жанру");
-    Console.Write("Выберите тип поиска: ");
+    Console.WriteLine("\n=== САМАЯ ДОРОГАЯ И ДЕШЁВАЯ КНИГА ===");
 
-    if (!int.TryParse(Console.ReadLine(), out int searchType) || searchType < 1 || searchType > 3)
+    List<Book> expensiveBooks = books
+        .OrderByDescending(b => b.Price)
+        .Take(1)
+        .ToList();
+
+    List<Book> cheapBooks = books
+        .OrderBy(b => b.Price)
+        .Take(1)
+        .ToList();
+
+    if (expensiveBooks.Count > 0)
     {
-        Console.WriteLine("Ошибка: выберите вариант от 1 до 3!");
-        return;
+        Console.WriteLine($"Самая дорогая книга: {expensiveBooks[0]}");
     }
-
-    List<Book> searchResults;
-
-    switch (searchType)
+    if (cheapBooks.Count > 0)
     {
-        case 1:
-            Console.Write("Введите название для поиска: ");
-            string titleSearch = Console.ReadLine();
-            if (string.IsNullOrWhiteSpace(titleSearch))
-            {
-                Console.WriteLine("Поисковый запрос не может быть пустым!");
-                return;
-            }
-            searchResults = books
-                .Where(b => b.Title.ToLower().Contains(titleSearch.ToLower()))
-                .ToList();
-            break;
-        case 2:
-            Console.Write("Введите автора для поиска: ");
-            string authorSearch = Console.ReadLine();
-            if (string.IsNullOrWhiteSpace(authorSearch))
-            {
-                Console.WriteLine("Поисковый запрос не может быть пустым!");
-                return;
-            }
-            searchResults = books
-                .Where(b => b.Author.ToLower().Contains(authorSearch.ToLower()))
-                .ToList();
-            break;
-        case 3:
-            Console.WriteLine("Выберите жанр:");
-            var genres = Enum.GetValues(typeof(Genre));
-            for (int i = 0; i < genres.Length; i++)
-            {
-                Console.WriteLine($"{i + 1}. {genres.GetValue(i)}");
-            }
-            Console.Write("Жанр (номер): ");
-            if (!int.TryParse(Console.ReadLine(), out int genreChoice) || genreChoice < 1 || genreChoice > genres.Length)
-            {
-                Console.WriteLine($"Ошибка: выберите жанр от 1 до {genres.Length}!");
-                return;
-            }
-            Genre selectedGenre = (Genre)(genreChoice - 1);
-            searchResults = books
-                .Where(b => b.Genre == selectedGenre)
-                .ToList();
-            break;
-        default:
-            return;
-    }
-
-    if (searchResults.Count > 0)
-    {
-        Console.WriteLine($"\nНайдено книг: {searchResults.Count}");
-        Console.WriteLine(new string('-', 80));
-        foreach (var book in searchResults)
-        {
-            Console.WriteLine(book);
-        }
-    }
-    else
-    {
-        Console.WriteLine("Книги по вашему запросу не найдены.");
+        Console.WriteLine($"Самая дешёвая книга: {cheapBooks[0]}");
     }
 }
 
-static void SortBooks()
+static void ShowBooksByAuthors()
 {
     if (!books.Any())
     {
@@ -91,62 +36,46 @@ static void SortBooks()
         return;
     }
 
-    Console.WriteLine("\n=== СОРТИРОВКА КНИГ ===");
-    Console.WriteLine("1. По названию (А-Я)");
-    Console.WriteLine("2. По названию (Я-А)");
-    Console.WriteLine("3. По году (сначала старые)");
-    Console.WriteLine("4. По году (сначала новые)");
-    Console.WriteLine("5. По цене (сначала дешёвые)");
-    Console.WriteLine("6. По цене (сначала дорогие)");
-    Console.Write("Выберите тип сортировки: ");
+    Console.WriteLine("\n=== КНИГИ ПО АВТОРАМ ===");
 
-    if (!int.TryParse(Console.ReadLine(), out int sortType) || sortType < 1 || sortType > 6)
+    List<IGrouping<string, Book>> booksByAuthor = books
+        .GroupBy(b => b.Author)
+        .OrderBy(g => g.Key)
+        .ToList();
+
+    foreach (var authorGroup in booksByAuthor)
     {
-        Console.WriteLine("Ошибка: выберите вариант от 1 до 6!");
+        List<Book> authorBooks = authorGroup
+            .OrderBy(b => b.Year)
+            .ToList();
+
+        Console.WriteLine($"\nАвтор: {authorGroup.Key}");
+        Console.WriteLine($"Количество книг: {authorBooks.Count}");
+        Console.WriteLine("Книги:");
+        foreach (var book in authorBooks)
+        {
+            Console.WriteLine($"  - {book.Title} ({book.Year}) - {book.Genre} - {book.Price:C}");
+        }
+        decimal totalValue = authorBooks.Sum(b => b.Price);
+        Console.WriteLine($"Общая стоимость: {totalValue:C}");
+    }
+}
+
+static void ShowAllBooks()
+{
+    if (!books.Any())
+    {
+        Console.WriteLine("Библиотека пуста!");
         return;
     }
 
-    List<Book> sortedBooks;
-
-    switch (sortType)
-    {
-        case 1:
-            sortedBooks = books
-                .OrderBy(b => b.Title)
-                .ToList();
-            break;
-        case 2:
-            sortedBooks = books
-                .OrderByDescending(b => b.Title)
-                .ToList();
-            break;
-        case 3:
-            sortedBooks = books
-                .OrderBy(b => b.Year)
-                .ToList();
-            break;
-        case 4:
-            sortedBooks = books
-                .OrderByDescending(b => b.Year)
-                .ToList();
-            break;
-        case 5:
-            sortedBooks = books
-                .OrderBy(b => b.Price)
-                .ToList();
-            break;
-        case 6:
-            sortedBooks = books
-                .OrderByDescending(b => b.Price)
-                .ToList();
-            break;
-        default:
-            return;
-    }
-
-    Console.WriteLine("\nОтсортированные книги:");
+    Console.WriteLine("\n=== ВСЕ КНИГИ В БИБЛИОТЕКЕ ===");
+    Console.WriteLine($"Всего книг: {books.Count}");
+    decimal totalValue = books.Sum(b => b.Price);
+    Console.WriteLine($"Общая стоимость коллекции: {totalValue:C}");
     Console.WriteLine(new string('-', 80));
-    foreach (var book in sortedBooks)
+
+    foreach (var book in books)
     {
         Console.WriteLine(book);
     }
@@ -165,6 +94,15 @@ switch (choice)
         break;
     case 4:
         SortBooks();
+        break;
+    case 5:
+        ShowPriceExtremes();
+        break;
+    case 6:
+        ShowBooksByAuthors();
+        break;
+    case 7:
+        ShowAllBooks();
         break;
     case 8:
         Console.WriteLine("До свидания!");
