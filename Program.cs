@@ -2,7 +2,93 @@
 using System.Collections.Generic;
 using System.Linq;
 
+class Program
+{
+    static void Main(string[] args)
+    {
+        Game game = new Game();
+        game.Start();
+    }
+}
 
+class Game
+{
+    private Hero player;
+    private Random random = new Random();
+    private int turnCount = 0;
+    private bool gameRunning = true;
+    private EnemyFactory enemyFactory;
+    private BattleSystem battleSystem;
+    private ChestSystem chestSystem;
+    private UIManager uiManager;
+
+    public Game()
+    {
+        
+        Armor startingArmor = new Armor(50, 10);
+        Weapon startingWeapon = new Weapon(50, 15);
+        player = new Hero(startingArmor, startingWeapon);
+        player.HP = 100;
+        player.Defense = 5;
+        player.Damage = 10;
+
+        enemyFactory = new EnemyFactory(random);
+        battleSystem = new BattleSystem(random);
+        chestSystem = new ChestSystem(random);
+        uiManager = new UIManager();
+    }
+
+    public void Start()
+    {
+        Console.WriteLine("=== ТЕКСТОВАЯ ПОШАГОВАЯ РОГАЛИК-ИГРА ===");
+        Console.WriteLine("Нажмите любую клавишу для начала...");
+        Console.ReadKey();
+
+        while (gameRunning && player.HP > 0)
+        {
+            turnCount++;
+            Console.WriteLine($"\n--- Ход {turnCount} ---");
+
+            uiManager.ShowPlayerStats(player);
+
+           
+            if (turnCount % 10 == 0)
+            {
+                Enemy boss = enemyFactory.CreateBoss(turnCount);
+                Console.WriteLine($"\nПОЯВИЛСЯ БОСС: {boss.Name}!");
+                battleSystem.StartBattle(player, boss);
+            }
+            else
+            {
+                
+                if (random.Next(2) == 0)
+                {
+                    Enemy enemy = enemyFactory.CreateRandomEnemy();
+                    Console.WriteLine($"\nВСТРЕЧА С ВРАГОМ: {enemy.Name}");
+                    battleSystem.StartBattle(player, enemy);
+                }
+                else
+                {
+                    Console.WriteLine($"\nВЫ НАШЛИ СУНДУК!");
+                    chestSystem.OpenChest(player);
+                }
+            }
+
+            if (player.HP <= 0)
+            {
+                Console.WriteLine("\nВЫ ПРОИГРАЛИ! Игра окончена.");
+                gameRunning = false;
+            }
+            else
+            {
+                Console.WriteLine("\nНажмите любую клавишу для продолжения...");
+                Console.ReadKey();
+            }
+        }
+
+        Console.WriteLine($"\nИгра завершена. Пройдено ходов: {turnCount}");
+    }
+}
 
 class Enemy : Abstract
 {
