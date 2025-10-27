@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 
+
 class Enemy : Abstract
 {
     public string Name { get; set; }
@@ -115,8 +116,137 @@ class EnemyFactory
 }
 
 
+class BattleSystem
+{
+    private Random random;
+    private bool playerFrozen = false;
+
+    public BattleSystem(Random rand)
+    {
+        random = rand;
+    }
+
+    public void StartBattle(Hero player, Enemy enemy)
+    {
+        Console.WriteLine($"Бой с {enemy.Name} (HP: {enemy.HP}, Урон: {enemy.Damage})");
+
+        while (enemy.HP > 0 && player.HP > 0)
+        {
+            
+            if (!playerFrozen)
+            {
+                PlayerTurn(player, enemy);
+            }
+            else
+            {
+                Console.WriteLine("Вы заморожены и пропускаете ход!");
+                playerFrozen = false;
+            }
+
+            if (enemy.HP <= 0) break;
+
+         
+            EnemyTurn(player, enemy);
+        }
+
+        if (enemy.HP <= 0)
+        {
+            Console.WriteLine($"Вы победили {enemy.Name}!");
+        }
+    }
+
+    private void PlayerTurn(Hero player, Enemy enemy)
+    {
+        Console.WriteLine("\nВаш ход:");
+        Console.WriteLine("1 - Атаковать");
+        Console.WriteLine("2 - Защищаться");
+        Console.Write("Выберите действие: ");
+
+        string input = Console.ReadLine();
+
+        if (input == "1")
+        {
+            int damage = player.Damage + player.Weapon_.Damage;
+            enemy.HP -= damage;
+            player.Weapon_.Durability -= 1;
+            Console.WriteLine($"Вы атаковали и нанесли {damage} урона!");
+        }
+        else if (input == "2")
+        {
+           
+            if (random.Next(100) < 40)
+            {
+                Console.WriteLine("Вы успешно уклонились от атаки!");
+                return;
+            }
+            else
+            {
+             
+                int blockPercent = random.Next(70, 101);
+                int damageReduction = (int)(player.Defense * blockPercent / 100.0);
+                Console.WriteLine($"Вы блокируете {blockPercent}% защиты ({damageReduction} урона)");
+                
+            }
+        }
+    }
+
+    private void EnemyTurn(Hero player, Enemy enemy)
+    {
+        Console.WriteLine($"\nХод {enemy.Name}:");
+
+        int baseDamage = enemy.Damage;
+        int finalDamage = baseDamage;
 
 
+        if (enemy.Types.Contains("гоблин") && enemy.TryCriticalHit(random))
+        {
+            finalDamage = (int)(baseDamage * 1.5);
+            Console.WriteLine($"Критический урон! Урон увеличен до {finalDamage}!");
+        }
+
+        if (enemy.Types.Contains("скелет") && enemy.IgnoresArmor)
+        {
+            Console.WriteLine($"{enemy.Name} игнорирует вашу защиту!");
+           
+        }
+        else
+        {
+           
+            int damageReduction = player.Defense + (int)player.Armor_.ArmorDefense;
+            finalDamage = Math.Max(1, finalDamage - damageReduction);
+        }
+
+        if (enemy.Types.Contains("маг") && enemy.TryFreeze(random))
+        {
+            playerFrozen = true;
+            Console.WriteLine($"{enemy.Name} замораживает вас! Вы пропустите следующий ход.");
+        }
+
+        player.HP -= finalDamage;
+        player.Armor_.Durability -= 1;
+
+        Console.WriteLine($"{enemy.Name} атакует и наносит {finalDamage} урона!");
+        Console.WriteLine($"Ваше HP: {player.HP}");
+
+       
+        CheckEquipmentDurability(player);
+    }
+
+    private void CheckEquipmentDurability(Hero player)
+    {
+        if (player.Weapon_.Durability <= 0)
+        {
+            Console.WriteLine("Ваше оружие сломалось!");
+            player.Weapon_ = new Weapon(0, 0); 
+        }
+
+        if (player.Armor_.Durability <= 0)
+        {
+            Console.WriteLine("Ваши доспехи сломались!");
+            player.Armor_ = new Armor(0, 0); 
+        }
+    }
+}
 
 
 class ChestSystem
