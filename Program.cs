@@ -76,3 +76,33 @@ namespace ISIP523_Korzh
 
             Console.WriteLine("Игра 'Автосервис' запущена!");
         }
+        static void DisplayGameStatus()
+        {
+            using (var context = new Pr7GordovKorzhContext())
+            {
+                var service = context.Services.First();
+                Console.WriteLine("=== АВТОСЕРВИС ===");
+                Console.WriteLine($"Баланс: {service.Balance} руб.");
+                Console.WriteLine($"Обработано машин: {service.TotalCarsProcessed}");
+                Console.WriteLine($"Успешных ремонтов: {service.SuccessfulRepairs}");
+                Console.WriteLine($"Ожидающих поставок: {Core.PendingDeliveries.Count}");
+                Console.WriteLine("===================");
+            }
+        }
+
+        static void DisplayActionMenu()
+        {
+            Console.WriteLine("\nВыберите действие:");
+            Console.WriteLine("1 - Принять заказ");
+            Console.WriteLine("2 - Отказаться от заказ");
+            Console.WriteLine("3 - Купить запчасти");
+            Console.WriteLine("4 - Показать склад");
+            Console.WriteLine("5 - Статистика");
+            Console.WriteLine("6 - Выйти из игры");
+        }
+
+        static int GetUserChoice()
+        {
+            Console.Write("Ваш выбор: ");
+            return int.TryParse(Console.ReadLine(), out int choice) ? choice : 0;
+        }
