@@ -106,3 +106,44 @@ namespace ISIP523_Korzh
             Console.Write("Ваш выбор: ");
             return int.TryParse(Console.ReadLine(), out int choice) ? choice : 0;
         }
+        static TempClient GenerateRandomClient()
+        {
+            var random = new Random();
+
+            using (var carsContext = new Pr7CarsContext())
+            {
+                using (var mainContext = new Pr7GordovKorzhContext())
+                {
+                    var carsCount = carsContext.Cars.Count();
+                    var skipCount = random.Next(carsCount);
+                    var randomCar = carsContext.Cars
+                        .OrderBy(c => c.Id)
+                        .Skip(skipCount)
+                        .First();
+
+                    var spares = mainContext.Spares.ToList();
+                    var randomSpare = spares[random.Next(spares.Count)];
+                    var repairCost = randomSpare.PurchasePrice * randomSpare.RepairMarkup;
+
+                    return new TempClient
+                    {
+                        CarModel = $"{randomCar.Brand} {randomCar.Model} ({randomCar.Year})",
+                        BrokenPartID = randomSpare.SpareId,
+                        BrokenPartName = randomSpare.SpareName,
+                        RepairCost = repairCost
+                    };
+                }
+            }
+        }
+
+        static void DisplayClientRequest(TempClient client)
+        {
+            using (var context = new Pr7GordovKorzhContext())
+            {
+                var spare = context.Spares.First(s => s.SpareId == client.BrokenPartID);
+                Console.WriteLine($"\nПриехал клиент на {client.CarModel}");
+                Console.WriteLine($"Поломка: {client.BrokenPartName}");
+                Console.WriteLine($"Стоимость ремонта: {client.RepairCost} руб.");
+                Console.WriteLine($"На складе: {spare.Quantity} шт.");
+            }
+        }
