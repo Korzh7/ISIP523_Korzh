@@ -347,3 +347,40 @@ namespace ISIP523_Korzh
                 }
             }
         }
+        static void ShowStatistics()
+        {
+            Console.Clear();
+            Console.WriteLine("=== СТАТИСТИКА ===");
+
+            using (var context = new Pr7GordovKorzhContext())
+            {
+                var service = context.Services.First();
+                var totalOrders = context.Orders.Count();
+                var completedOrders = context.Orders.Count(o => o.Status == "Completed");
+                var failedOrders = context.Orders.Count(o => o.Status == "Failed");
+                var declinedOrders = context.Orders.Count(o => o.Status == "Declined");
+
+                var totalProfit = context.Orders.Sum(o => o.FinalProfit);
+
+                Console.WriteLine($"Всего заказов: {totalOrders}");
+                Console.WriteLine($"Успешных ремонтов: {completedOrders}");
+                Console.WriteLine($"Неудачных ремонтов: {failedOrders}");
+                Console.WriteLine($"Отклоненных заказов: {declinedOrders}");
+                Console.WriteLine($"Общая прибыль: {totalProfit} руб.");
+                Console.WriteLine($"Текущий баланс: {service.Balance} руб.");
+
+                var popularSpares = context.Orders
+                    .GroupBy(o => o.BrokenPartId)
+                    .Select(g => new { SpareId = g.Key, Count = g.Count() })
+                    .OrderByDescending(x => x.Count)
+                    .Take(3)
+                    .ToList();
+
+                Console.WriteLine("\nСамые частые поломки:");
+                foreach (var item in popularSpares)
+                {
+                    var spare = context.Spares.First(s => s.SpareId == item.SpareId);
+                    Console.WriteLine($"  {spare.SpareName}: {item.Count} раз");
+                }
+            }
+        }
