@@ -147,3 +147,79 @@ namespace ISIP523_Korzh
                 Console.WriteLine($"На складе: {spare.Quantity} шт.");
             }
         }
+        static void AcceptOrder(TempClient client)
+        {
+            using (var context = new Pr7GordovKorzhContext())
+            {
+                var service = context.Services.First();
+                var brokenSpare = context.Spares.First(s => s.SpareId == client.BrokenPartID);
+
+                service.TotalCarsProcessed++;
+                Core.CarsProcessed++;
+
+                if (brokenSpare.Quantity > 0)
+                {
+                    brokenSpare.Quantity--;
+                    service.Balance += client.RepairCost;
+                    service.SuccessfulRepairs++;
+
+                    var order = new Order
+                    {
+                        CarModel = client.CarModel,
+                        BrokenPartId = client.BrokenPartID,
+                        UsedPartId = client.BrokenPartID,
+                        ServiceId = 1,
+                        Status = "Completed",
+                        RepairCost = client.RepairCost,
+                        FinalProfit = client.RepairCost - brokenSpare.PurchasePrice,
+                        OrderDate = DateTime.Now
+                    };
+                    context.Orders.Add(order);
+
+                    Console.WriteLine($"Ремонт выполнен успешно! Получено: {client.RepairCost} руб.");
+                }
+                else
+                {
+                    Console.WriteLine("Нужной детали нет на складе! Производим замену случайной деталью...");
+
+                    var randomSpare = GetRandomAvailableSpare(context);
+                    if (randomSpare != null)
+                    {
+                        randomSpare.Quantity--;
+
+                        var penalty = 150.00m;
+                        service.Balance -= penalty;
+
+                        var order = new Order
+                        {
+                            CarModel = client.CarModel,
+                            BrokenPartId = client.BrokenPartID,
+                            UsedPartId = randomSpare.SpareId,
+                            ServiceId = 1,
+                            Status = "Failed",
+                            RepairCost = 0,
+                            FinalProfit = -penalty,
+                            OrderDate = DateTime.Now
+                        };
+                        context.Orders.Add(order);
+
+                        Console.WriteLine($"Клиент недоволен! Штраф: {penalty} руб.");
+                        Console.WriteLine($"Использована случайная деталь: {randomSpare.SpareName}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("На складе нет вообще никаких деталей! Штраф удвоен.");
+                        service.Balance -= 300.00m;
+                    }
+                }
+
+                service.LastUpdated = DateTime.Now;
+                context.SaveChanges();
+            }
+        }
+
+        static Spare GetRandomAvailableSpare(Pr7GordovKorzhContext context)
+        {
+            var availableSpares = context.Spares.Where(s => s.Quantity > 0).ToList();
+            return availableSpares.Any() ? availableSpares[new Random().Next(availableSpares.Count)] : null;
+        }
