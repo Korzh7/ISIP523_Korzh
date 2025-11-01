@@ -223,3 +223,32 @@ namespace ISIP523_Korzh
             var availableSpares = context.Spares.Where(s => s.Quantity > 0).ToList();
             return availableSpares.Any() ? availableSpares[new Random().Next(availableSpares.Count)] : null;
         }
+        static void DeclineOrder(TempClient client)
+        {
+            using (var context = new Pr7GordovKorzhContext())
+            {
+                var service = context.Services.First();
+                var penalty = 50.00m;
+
+                service.Balance -= penalty;
+                service.TotalCarsProcessed++;
+                service.LastUpdated = DateTime.Now;
+                Core.CarsProcessed++;
+
+                var order = new Order
+                {
+                    CarModel = client.CarModel,
+                    BrokenPartId = client.BrokenPartID,
+                    UsedPartId = null,
+                    ServiceId = 1,
+                    Status = "Declined",
+                    RepairCost = 0,
+                    FinalProfit = -penalty,
+                    OrderDate = DateTime.Now
+                };
+                context.Orders.Add(order);
+                context.SaveChanges();
+
+                Console.WriteLine($"Заказ отклонен. Штраф: {penalty} руб.");
+            }
+        }
