@@ -313,3 +313,37 @@ namespace ISIP523_Korzh
                 }
             }
         }
+        static void ShowWarehouseStatus()
+        {
+            Console.Clear();
+            Console.WriteLine("=== СКЛАД ===");
+
+            using (var context = new Pr7GordovKorzhContext())
+            {
+                var spares = context.Spares.ToList();
+
+                foreach (var spare in spares)
+                {
+                    Console.WriteLine($"{spare.SpareName}: {spare.Quantity} шт. (мин. уровень: {spare.MinimumStockLevel})");
+                }
+
+                if (Core.PendingDeliveries.Any())
+                {
+                    Console.WriteLine("\n=== ОЖИДАЮЩИЕ ПОСТАВКИ ===");
+                    foreach (var delivery in Core.PendingDeliveries)
+                    {
+                        Console.WriteLine($"{delivery.SpareName}: {delivery.Quantity} шт. (поставка через {delivery.OrderPlacedAtCar + 2 - Core.CarsProcessed} машин)");
+                    }
+                }
+
+                var lowStock = spares.Where(s => s.Quantity < s.MinimumStockLevel).ToList();
+                if (lowStock.Any())
+                {
+                    Console.WriteLine("\nНИЗКИЙ ЗАПАС:");
+                    foreach (var spare in lowStock)
+                    {
+                        Console.WriteLine($"{spare.SpareName}: {spare.Quantity} шт. (требуется: {spare.MinimumStockLevel})");
+                    }
+                }
+            }
+        }
