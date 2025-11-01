@@ -384,3 +384,50 @@ namespace ISIP523_Korzh
                 }
             }
         }
+        static void ProcessDeliveries()
+        {
+            var deliveriesToProcess = Core.PendingDeliveries
+                .Where(d => Core.CarsProcessed >= d.OrderPlacedAtCar + 2)
+                .ToList();
+
+            using (var context = new Pr7GordovKorzhContext())
+            {
+                foreach (var delivery in deliveriesToProcess)
+                {
+                    var spare = context.Spares.First(s => s.SpareId == delivery.SpareID);
+                    spare.Quantity += delivery.Quantity;
+
+                    Console.WriteLine($"Поставка получена: {delivery.SpareName} - {delivery.Quantity} шт.");
+                    Core.PendingDeliveries.Remove(delivery);
+                }
+
+                if (deliveriesToProcess.Any())
+                {
+                    context.SaveChanges();
+                }
+            }
+        }
+
+        static void CheckGameOver()
+        {
+            using (var context = new Pr7GordovKorzhContext())
+            {
+                var service = context.Services.First();
+
+                if (service.Balance <= 0)
+                {
+                    Console.WriteLine("\nИГРА ОКОНЧЕНА! Вы банкрот!!!");
+                    Console.WriteLine($"Итоговый счет: Успешных ремонтов - {service.SuccessfulRepairs}");
+                    Environment.Exit(0);
+                }
+
+                if (service.Balance >= 5000.00m)
+                {
+                    Console.WriteLine("\nПОБЕДА! Вы заработали 5000 рублей!");
+                    Console.WriteLine($"Итоговый счет: Успешных ремонтов - {service.SuccessfulRepairs}");
+                    Environment.Exit(0);
+                }
+            }
+        }
+    }
+}
