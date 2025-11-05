@@ -469,5 +469,202 @@ class Program
 
         Console.WriteLine("\nОбщая сумма: " + total + " руб.");
     }
+    public static void CreateOrder(Pr8GordovMainContext context, int userId)
+    {
+        var cartItems = context.CartItems
+            .Where(ci => ci.UserId == userId)
+            .Join(context.Products,
+                  ci => ci.ProductId,
+                  p => p.Id,
+                  (ci, p) => new { CartItem = ci, Product = p })
+            .ToList();
 
+        if (cartItems.Count == 0)
+        {
+            Console.WriteLine("Ваша корзина пуста! Нечего оформлять.");
+            return;
+        }
+
+        Console.WriteLine("\n=== ВАША КОРЗИНА ===");
+        decimal total = 0;
+        for (int i = 0; i < cartItems.Count; i++)
+        {
+            var item = cartItems[i];
+            decimal itemTotal = (decimal)(item.Product.Price * item.CartItem.Quantity);
+            total += itemTotal;
+            Console.WriteLine((i + 1) + ". " + item.Product.Name + " - " + item.Product.Price + " руб. x " + item.CartItem.Quantity + " = " + itemTotal + " руб.");
+        }
+        Console.WriteLine("\nОбщая сумма: " + total + " руб.");
+
+        Console.WriteLine("\nВыберите способ покупки:");
+        Console.WriteLine("1 - Купить один товар");
+        Console.WriteLine("2 - Купить все товары");
+        Console.WriteLine("0 - Отмена");
+        Console.Write("Ваш выбор: ");
+
+        var purchaseChoice = Console.ReadLine();
+        List<CartItem> itemsToPurchase = new List<CartItem>();
+
+        switch (purchaseChoice)
+        {
+            case "1":
+                Console.Write("Введите номер товара для покупки: ");
+                if (int.TryParse(Console.ReadLine(), out int itemNumber) && itemNumber >= 1 && itemNumber <= cartItems.Count)
+                {
+                    itemsToPurchase.Add(cartItems[itemNumber - 1].CartItem);
+                    Console.WriteLine("Выбран товар: " + cartItems[itemNumber - 1].Product.Name);
+                }
+                else
+                {
+                    Console.WriteLine("Неверный номер товара!");
+                    return;
+                }
+                break;
+
+            case "2":
+                itemsToPurchase = cartItems.Select(ci => ci.CartItem).ToList();
+                Console.WriteLine("Выбраны все товары в корзине");
+                break;
+
+            case "0":
+                Console.WriteLine("Оформление заказа отменено.");
+                return;
+
+            default:
+                Console.WriteLine("Неверный выбор!");
+                return;
+        }
+
+        var pickupPoints = context.PickupPoints.ToList();
+        if (pickupPoints.Count == 0)
+        {
+            Console.WriteLine("Нет доступных пунктов выдачи!");
+            return;
+        }
+
+        Console.WriteLine("\n=== ВЫБОР ПУНКТА ВЫДАЧИ ===");
+        foreach (var point in pickupPoints)
+        {
+            Console.WriteLine("[ID: " + point.Id + "] " + point.Address + " - " + point.WorkingHours);
+        }
+
+        Console.Write("Введите ID пункта выдачи: ");
+        if (!int.TryParse(Console.ReadLine(), out int pickupPointId) ||
+            !pickupPoints.Any(pp => pp.Id == pickupPointId))
+        {
+            Console.WriteLine("Неверный ID пункта выдачи!");
+            return;
+        }
+
+        decimal orderTotal = 0;
+        foreach (var cartItem in itemsToPurchase)
+        {
+            var product = context.Products.First(p => p.Id == cartItem.ProductId);
+            decimal itemTotal = (decimal)(product.Price * cartItem.Quantity);
+            orderTotal += itemTotal;
+        }
+
+        Console.WriteLine("\n=== ПОДТВЕРЖДЕНИЕ ЗАКАЗА ===");
+        foreach (var cartItem in itemsToPurchase)
+        {
+            var product = context.Products.First(p => p.Id == cartItem.ProductId);
+            decimal itemTotal = (decimal)(product.Price * cartItem.Quantity);
+            Console.WriteLine(product.Name + " - " + product.Price + " руб. x " + cartItem.Quantity + " = " + itemTotal + " руб.");
+        }
+
+        var selectedPickupPoint = pickupPoints.First(pp => pp.Id == pickupPointId);
+        Console.WriteLine("Пункт выдачи: " + selectedPickupPoint.Address);
+        Console.WriteLine("Общая сумма заказа: " + orderTotal + " руб.");
+
+        Console.Write("\nПодтвердить заказ? (да/нет): ");
+        var confirm = Console.ReadLine()?.ToLower();
+
+        if (confirm == "да" || confirm == "д")
+        {
+            try
+            {
+                var order = new Order
+                {
+                    UserId = userId,
+                    PickupPointId = pickupPointId,
+                    OrderDate = DateTime.Now
+
+                };
+                context.Orders.Add(order);
+                context.SaveChanges();
+
+                foreach (var cartItem in itemsToPurchase)
+                {
+                    var product = context.Products.First(p => p.Id == cartItem.ProductId);
+                    var orderItem = new OrderItem
+                    {
+                        OrderId = order.Id,
+                        ProductId = cartItem.ProductId,
+                        Quantity = cartItem.Quantity,
+                        Price = product.Price
+                    };
+                    context.OrderItems.Add(orderItem);
+                    context.CartItems.Remove(cartItem);
+                    product.Quantity -= cartItem.Quantity;
+                }
+
+                context.SaveChanges();
+                Console.WriteLine("\nЗаказ успешно оформлен! Номер заказа: " + order.Id);
+                Console.WriteLine("Заберите заказ по адресу: " + selectedPickupPoint.Address);
+                Console.WriteLine("Время работы: " + selectedPickupPoint.WorkingHours);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Ошибка при оформлении заказа: " + ex.Message);
+            }
+        }
+        else
+        {
+            Console.WriteLine("Оформление заказа отменено.");
+        }
+    }
+
+    public static void ShowOrderHistory(Pr8GordovMainContext context, int userId)
+    {
+        var orders = context.Orders
+            .Where(o => o.UserId == userId)
+            .OrderByDescending(o => o.OrderDate)
+            .Join(context.PickupPoints,
+                  o => o.PickupPointId,
+                  pp => pp.Id,
+                  (o, pp) => new { Order = o, PickupPoint = pp })
+            .ToList();
+
+        if (orders.Count == 0)
+        {
+            Console.WriteLine("У вас еще нет заказов.");
+            return;
+        }
+
+        Console.WriteLine("\n=== ИСТОРИЯ ЗАКАЗОВ ===");
+        foreach (var orderInfo in orders)
+        {
+            Console.WriteLine("\n--- Заказ #" + orderInfo.Order.Id + " ---");
+            Console.WriteLine("Дата: " + orderInfo.Order.OrderDate.ToString());
+            Console.WriteLine("Пункт выдачи: " + orderInfo.PickupPoint.Address);
+
+            var orderItems = context.OrderItems
+                .Where(oi => oi.OrderId == orderInfo.Order.Id)
+                .Join(context.Products,
+                      oi => oi.ProductId,
+                      p => p.Id,
+                      (oi, p) => new { OrderItem = oi, Product = p })
+                .ToList();
+
+            decimal orderTotal = 0;
+            Console.WriteLine("Товары:");
+            foreach (var item in orderItems)
+            {
+                decimal itemTotal = (decimal)(item.OrderItem.Price * item.OrderItem.Quantity);
+                orderTotal += itemTotal;
+                Console.WriteLine("  " + item.Product.Name + " - " + item.OrderItem.Price + " руб. x " + item.OrderItem.Quantity + " = " + itemTotal + " руб.");
+            }
+            Console.WriteLine("Общая сумма: " + orderTotal + " руб.");
+        }
+    }
 }
